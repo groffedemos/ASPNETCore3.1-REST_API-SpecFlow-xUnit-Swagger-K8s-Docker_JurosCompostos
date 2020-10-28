@@ -61,6 +61,10 @@ stages:
     pool:
       vmImage: $(vmImageName)
     steps:
+    - task: Docker@2
+      inputs:
+        containerRegistry: 'groffeazuredevops'
+        command: 'login'
     - task: AzureWebAppContainer@1
       inputs:
         azureSubscription: 'Microsoft Azure Sponsorship(f3e7d90b-efba-4481-ac3d-d8df26b6235d)'
