@@ -35,7 +35,7 @@ stages:
         testRunTitle: 'Testes de Juros Compostos'
 
 - stage: Build
-  displayName: Build and push stage
+  displayName: Build and push no Azure Container Registry
   jobs:  
   - job: Build
     displayName: Build
@@ -52,3 +52,17 @@ stages:
         tags: |
           $(tag)
           latest
+
+- stage: Deployment
+  displayName: Deployment no Azure App Service
+  jobs:  
+  - job: Deployment
+    displayName: Deployment
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - task: AzureWebAppContainer@1
+      inputs:
+        azureSubscription: 'Microsoft Azure Sponsorship(f3e7d90b-efba-4481-ac3d-d8df26b6235d)'
+        appName: 'groffefinancas'
+        containers: '$(dockerRegistryServiceConnection)/$(imageRepository):$(tag)'
