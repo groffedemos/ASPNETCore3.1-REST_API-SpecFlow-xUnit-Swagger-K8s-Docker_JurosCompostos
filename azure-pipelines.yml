@@ -1,0 +1,54 @@
+# Docker
+# Build and push an image to Azure Container Registry
+# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
+
+trigger:
+- master
+
+resources:
+- repo: self
+
+variables:
+  # Container registry service connection established during pipeline creation
+  dockerRegistryServiceConnection: 'c8cf7561-510f-4aaa-a390-f249ee157189'
+  imageRepository: 'apifinancas'
+  containerRegistry: 'groffeazuredevops.azurecr.io'
+  dockerfilePath: '$(Build.SourcesDirectory)/APIFinancas/Dockerfile'
+  tag: '$(Build.BuildId)'
+  
+  # Agent VM image name
+  vmImageName: 'ubuntu-latest'
+
+stages:
+- stage: Testes
+  displayName: Testes validando cálculo de juros compostos
+  jobs:  
+  - job: Testes
+    displayName: Testes
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - task: DotNetCoreCLI@2
+      inputs:
+        command: 'test'
+        projects: '$(Build.SourcesDirectory)/APIFinancas.Especificacoes/APIFinancas.Especificacoes.csproj'
+        testRunTitle: 'Testes de Juros Compostos'
+
+- stage: Build
+  displayName: Build and push stage
+  jobs:  
+  - job: Build
+    displayName: Build
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - task: Docker@2
+      displayName: Build and push an image to container registry
+      inputs:
+        command: buildAndPush
+        repository: $(imageRepository)
+        dockerfile: $(dockerfilePath)
+        containerRegistry: $(dockerRegistryServiceConnection)
+        tags: |
+          $(tag)
+          latest
